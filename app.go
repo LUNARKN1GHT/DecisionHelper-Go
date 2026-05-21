@@ -290,6 +290,15 @@ func (a *App) SaveLLMConfig(cfg LLMConfig) error {
 	return saveLLMConfig(cfg)
 }
 
+// TestLLMConfig 用传入的配置发一条最小请求，验证连通性和 Key 有效性
+func (a *App) TestLLMConfig(cfg LLMConfig) error {
+	if cfg.APIKey == "" {
+		return fmt.Errorf("API Key 不能为空")
+	}
+	_, err := callLLM(cfg, "You are a test assistant.", "Reply with the single word: ok")
+	return err
+}
+
 // ── AI 辅助功能 ────────────────────────────────────────────────────────────
 
 func (a *App) SuggestCriteria(decisionID string) ([]SuggestedCriterion, error) {

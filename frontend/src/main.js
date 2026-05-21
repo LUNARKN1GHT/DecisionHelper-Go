@@ -8,7 +8,7 @@ import {
     AddCriterion, UpdateCriterion, RemoveCriterion,
     SetScore,
     GetResults,
-    GetLLMConfig, SaveLLMConfig,
+    GetLLMConfig, SaveLLMConfig, TestLLMConfig,
     SuggestCriteria, SuggestScores, AnalyzeResults,
 } from '../wailsjs/go/main/App';
 
@@ -141,23 +141,47 @@ modalConfirm.addEventListener('click', async () => {
 });
 
 // ── Settings Modal ─────────────────────────────────────────────────────────
-const settingsOverlay  = document.getElementById('settings-overlay');
-const settingsBaseURL  = document.getElementById('settings-base-url');
-const settingsAPIKey   = document.getElementById('settings-api-key');
-const settingsModel    = document.getElementById('settings-model');
-const settingsCancel   = document.getElementById('settings-cancel');
-const settingsSave     = document.getElementById('settings-save');
+const settingsOverlay    = document.getElementById('settings-overlay');
+const settingsBaseURL    = document.getElementById('settings-base-url');
+const settingsAPIKey     = document.getElementById('settings-api-key');
+const settingsModel      = document.getElementById('settings-model');
+const settingsCancel     = document.getElementById('settings-cancel');
+const settingsSave       = document.getElementById('settings-save');
+const settingsTest       = document.getElementById('settings-test');
+const settingsTestResult = document.getElementById('settings-test-result');
 
 document.getElementById('btn-settings').addEventListener('click', async () => {
     const cfg = await GetLLMConfig();
     settingsBaseURL.value = cfg.base_url || 'https://api.deepseek.com';
     settingsAPIKey.value  = cfg.api_key  || '';
     settingsModel.value   = cfg.model    || 'deepseek-chat';
+    settingsTestResult.className = 'settings-test-result hidden';
+    settingsTestResult.textContent = '';
     settingsOverlay.classList.remove('hidden');
     setTimeout(() => settingsAPIKey.focus(), 50);
 });
 
 settingsCancel.addEventListener('click', () => settingsOverlay.classList.add('hidden'));
+
+settingsTest.addEventListener('click', async () => {
+    settingsTest.disabled = true;
+    settingsTestResult.className = 'settings-test-result';
+    settingsTestResult.textContent = '测试中…';
+    try {
+        await TestLLMConfig({
+            base_url: settingsBaseURL.value.trim(),
+            api_key:  settingsAPIKey.value.trim(),
+            model:    settingsModel.value.trim() || 'deepseek-chat',
+        });
+        settingsTestResult.classList.add('success');
+        settingsTestResult.textContent = '✓ 连接成功，API Key 有效';
+    } catch (err) {
+        settingsTestResult.classList.add('error');
+        settingsTestResult.textContent = '✕ ' + String(err);
+    } finally {
+        settingsTest.disabled = false;
+    }
+});
 
 settingsSave.addEventListener('click', async () => {
     await withErrorHandling(async () => {

@@ -456,6 +456,25 @@ html, body {
     margin-top: 4px;
 }
 
+.settings-test-result {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.settings-test-result.success {
+    background: rgba(16,185,129,.12);
+    color: var(--success);
+    border: 1px solid rgba(16,185,129,.3);
+}
+
+.settings-test-result.error {
+    background: rgba(239,68,68,.1);
+    color: var(--danger);
+    border: 1px solid rgba(239,68,68,.25);
+}
+
 /* ── AI ── */
 .btn-ai {
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
