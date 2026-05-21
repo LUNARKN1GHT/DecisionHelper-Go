@@ -279,3 +279,70 @@ func (a *App) GetResults(decisionID string) ([]OptionResult, error) {
 
 	return results, nil
 }
+
+// ── LLM 配置 ──────────────────────────────────────────────────────────────
+
+func (a *App) GetLLMConfig() (LLMConfig, error) {
+	return loadLLMConfig()
+}
+
+func (a *App) SaveLLMConfig(cfg LLMConfig) error {
+	return saveLLMConfig(cfg)
+}
+
+// ── AI 辅助功能 ────────────────────────────────────────────────────────────
+
+func (a *App) SuggestCriteria(decisionID string) ([]SuggestedCriterion, error) {
+	cfg, err := loadLLMConfig()
+	if err != nil {
+		return nil, err
+	}
+	if cfg.APIKey == "" {
+		return nil, fmt.Errorf("请先在设置中配置 API Key")
+	}
+	d, err := a.GetDecision(decisionID)
+	if err != nil {
+		return nil, err
+	}
+	return suggestCriteriaLLM(cfg, d)
+}
+
+func (a *App) SuggestScores(decisionID string) ([]SuggestedScore, error) {
+	cfg, err := loadLLMConfig()
+	if err != nil {
+		return nil, err
+	}
+	if cfg.APIKey == "" {
+		return nil, fmt.Errorf("请先在设置中配置 API Key")
+	}
+	d, err := a.GetDecision(decisionID)
+	if err != nil {
+		return nil, err
+	}
+	if len(d.Options) == 0 || len(d.Criteria) == 0 {
+		return nil, fmt.Errorf("请先添加选项和标准")
+	}
+	return suggestScoresLLM(cfg, d)
+}
+
+func (a *App) AnalyzeResults(decisionID string) (string, error) {
+	cfg, err := loadLLMConfig()
+	if err != nil {
+		return "", err
+	}
+	if cfg.APIKey == "" {
+		return "", fmt.Errorf("请先在设置中配置 API Key")
+	}
+	d, err := a.GetDecision(decisionID)
+	if err != nil {
+		return "", err
+	}
+	results, err := a.GetResults(decisionID)
+	if err != nil {
+		return "", err
+	}
+	if len(results) == 0 {
+		return "", fmt.Errorf("没有可分析的结果，请先完成评分")
+	}
+	return analyzeResultsLLM(cfg, d, results)
+}
