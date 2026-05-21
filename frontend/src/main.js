@@ -72,9 +72,22 @@ async function renderList() {
             </div>
         `;
         card.querySelector('.decision-card-info').addEventListener('click', () => openEdit(d.id));
+        let delTimer = null;
         card.querySelector('.btn-del').addEventListener('click', async (e) => {
             e.stopPropagation();
-            if (!confirm(`确定删除「${d.title}」？`)) return;
+            const btn = e.currentTarget;
+            if (!btn.dataset.confirming) {
+                btn.dataset.confirming = '1';
+                btn.textContent = '确认删除？';
+                btn.style.background = 'rgba(239,68,68,.2)';
+                delTimer = setTimeout(() => {
+                    btn.dataset.confirming = '';
+                    btn.textContent = '删除';
+                    btn.style.background = '';
+                }, 3000);
+                return;
+            }
+            clearTimeout(delTimer);
             await withErrorHandling(async () => {
                 await DeleteDecision(d.id);
                 await renderList();
