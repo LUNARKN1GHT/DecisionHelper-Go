@@ -1,3 +1,7 @@
 build/bin
 node_modules
 frontend/dist
+frontend/wailsjs/
+frontend/package.json.md5
+DecisionHelper-Go
+.DS_Store
