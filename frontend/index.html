@@ -13,7 +13,10 @@
     <div id="view-list" class="view">
         <header class="app-header">
             <h1 class="app-title">DecisionHelper</h1>
-            <button id="btn-new-decision" class="btn btn-primary">+ 新建决策</button>
+            <div class="header-actions">
+                <button id="btn-settings" class="btn btn-ghost" title="AI 设置">⚙</button>
+                <button id="btn-new-decision" class="btn btn-primary">+ 新建决策</button>
+            </div>
         </header>
         <div id="decision-list" class="decision-list"></div>
         <div id="empty-state" class="empty-state hidden">
@@ -46,8 +49,13 @@
 
             <!-- 标准列 -->
             <section class="panel">
-                <h3 class="panel-title">评价标准</h3>
+                <div class="panel-title-row">
+                    <h3 class="panel-title">评价标准</h3>
+                    <button id="btn-ai-criteria" class="btn btn-ai">✦ AI 建议标准</button>
+                </div>
                 <div id="criteria-list" class="criteria-list"></div>
+                <!-- AI 标准建议面板 -->
+                <div id="ai-criteria-panel" class="ai-panel hidden"></div>
                 <div class="add-row">
                     <input id="input-criterion-name" class="input" type="text" placeholder="标准名称"/>
                     <select id="input-criterion-weight" class="select">
@@ -68,8 +76,13 @@
         <header class="app-header">
             <button class="btn btn-ghost" id="btn-back-edit">← 返回编辑</button>
             <h2 id="score-title" class="view-title"></h2>
-            <button class="btn btn-primary" id="btn-score-results">查看结果</button>
+            <div class="header-actions">
+                <button id="btn-ai-scores" class="btn btn-ai">✦ AI 辅助评分</button>
+                <button class="btn btn-primary" id="btn-score-results">查看结果</button>
+            </div>
         </header>
+        <!-- AI 评分说明面板 -->
+        <div id="ai-scores-panel" class="ai-panel hidden" style="margin:0 20px 4px"></div>
         <div class="table-wrap">
             <table id="score-table" class="score-table"></table>
         </div>
@@ -80,9 +93,10 @@
         <header class="app-header">
             <button class="btn btn-ghost" id="btn-back-score">← 返回评分</button>
             <h2 id="results-title" class="view-title"></h2>
-            <span></span>
+            <button id="btn-ai-analyze" class="btn btn-ai">✦ AI 分析</button>
         </header>
         <div id="results-list" class="results-list"></div>
+        <div id="ai-analysis-panel" class="ai-analysis-panel hidden"></div>
     </div>
 
     <!-- 新建决策弹窗 -->
@@ -93,6 +107,26 @@
             <div class="modal-actions">
                 <button id="modal-cancel" class="btn btn-ghost">取消</button>
                 <button id="modal-confirm" class="btn btn-primary">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 设置弹窗 -->
+    <div id="settings-overlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">AI 设置</h3>
+            <div class="settings-form">
+                <label class="form-label">API 接入地址</label>
+                <input id="settings-base-url" class="input" type="text" placeholder="https://api.deepseek.com"/>
+                <label class="form-label">API Key</label>
+                <input id="settings-api-key" class="input" type="password" placeholder="sk-..."/>
+                <label class="form-label">模型名称</label>
+                <input id="settings-model" class="input" type="text" placeholder="deepseek-chat"/>
+                <p class="form-hint">API Key 仅存储在本地，不会上传至任何服务器。</p>
+            </div>
+            <div class="modal-actions">
+                <button id="settings-cancel" class="btn btn-ghost">取消</button>
+                <button id="settings-save" class="btn btn-primary">保存</button>
             </div>
         </div>
     </div>
