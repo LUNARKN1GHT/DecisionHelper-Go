@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # ── macOS Universal Binary (.app → .zip) ──────────────────────────────────
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Build macOS (Universal)
+        run: wails build -platform darwin/universal
+
+      - name: Package .app as zip
+        run: |
+          cd build/bin
+          zip -r "DecisionHelper-Go-${{ github.ref_name }}-macOS-Universal.zip" DecisionHelper-Go.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: build/bin/DecisionHelper-Go-${{ github.ref_name }}-macOS-Universal.zip
+
+  # ── Windows x64 (.exe) ────────────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Build Windows
+        run: wails build -platform windows/amd64
+
+      - name: Rename exe
+        shell: bash
+        run: |
+          mv build/bin/DecisionHelper-Go.exe \
+             "build/bin/DecisionHelper-Go-${{ github.ref_name }}-Windows-x64.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: build/bin/DecisionHelper-Go-${{ github.ref_name }}-Windows-x64.exe
+
+  # ── Create GitHub Release ─────────────────────────────────────────────────
+  release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: DecisionHelper-Go ${{ github.ref_name }}
+          # 包含 '-' 的 tag（如 v1.0.0-beta）自动标记为预发布
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          files: artifacts/*
